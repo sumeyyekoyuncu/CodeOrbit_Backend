@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeOrbit.API", "CodeOrbit.API\CodeOrbit.API.csproj", "{1E49A5AF-C606-46D6-85D1-7900C8546FB2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0E6240DD-6B31-4255-A6DA-076E761A3777} = {0E6240DD-6B31-4255-A6DA-076E761A3777}
+		{702587D8-84FD-4537-8751-B6662E02E998} = {702587D8-84FD-4537-8751-B6662E02E998}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeOrbit.Infrastructure", "CodeOrbit.Infrastructure\CodeOrbit.Infrastructure.csproj", "{0E6240DD-6B31-4255-A6DA-076E761A3777}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C} = {2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}
+		{702587D8-84FD-4537-8751-B6662E02E998} = {702587D8-84FD-4537-8751-B6662E02E998}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeOrbit.Application", "CodeOrbit.Application\CodeOrbit.Application.csproj", "{702587D8-84FD-4537-8751-B6662E02E998}"
+	ProjectSection(ProjectDependencies) = postProject
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C} = {2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeOrbit.Domain", "CodeOrbit.Domain\CodeOrbit.Domain.csproj", "{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CodeOrbit.Tests", "CodeOrbit.Tests\CodeOrbit.Tests.csproj", "{AA5B1AAF-29FB-4104-81A4-F2D06F02575D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1E49A5AF-C606-46D6-85D1-7900C8546FB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E49A5AF-C606-46D6-85D1-7900C8546FB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E49A5AF-C606-46D6-85D1-7900C8546FB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E49A5AF-C606-46D6-85D1-7900C8546FB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E6240DD-6B31-4255-A6DA-076E761A3777}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E6240DD-6B31-4255-A6DA-076E761A3777}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E6240DD-6B31-4255-A6DA-076E761A3777}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E6240DD-6B31-4255-A6DA-076E761A3777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{702587D8-84FD-4537-8751-B6662E02E998}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{702587D8-84FD-4537-8751-B6662E02E998}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{702587D8-84FD-4537-8751-B6662E02E998}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{702587D8-84FD-4537-8751-B6662E02E998}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2E6FD3F4-A44E-4F1F-B101-8CA55F30DB7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA5B1AAF-29FB-4104-81A4-F2D06F02575D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA5B1AAF-29FB-4104-81A4-F2D06F02575D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA5B1AAF-29FB-4104-81A4-F2D06F02575D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA5B1AAF-29FB-4104-81A4-F2D06F02575D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
