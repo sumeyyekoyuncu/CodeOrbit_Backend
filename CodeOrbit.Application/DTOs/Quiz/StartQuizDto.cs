@@ -13,5 +13,6 @@ namespace CodeOrbit.Application.DTOs.Quiz
         public int CategoryId { get; set; }
         public DifficultyLevel DifficultyLevel { get; set; }
         public int QuestionCount { get; set; } = 10;
+        public bool FromFavoritesOnly { get; set; } = false;
     }
 }

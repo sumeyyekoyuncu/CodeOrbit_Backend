@@ -4,6 +4,7 @@ using CodeOrbit.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CodeOrbit.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226124748_AddDailyChallenge")]
+    partial class AddDailyChallenge
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,112 +24,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Badge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("RequiredCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Requirement")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Badges");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Description = "İlk quiz'ini tamamla",
-                            Icon = "🎯",
-                            Name = "İlk Adım",
-                            RequiredCount = 1,
-                            Requirement = "Complete1Quiz"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Description = "10 quiz tamamla",
-                            Icon = "📚",
-                            Name = "Meraklı",
-                            RequiredCount = 10,
-                            Requirement = "Complete10Quizzes"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Description = "50 quiz tamamla",
-                            Icon = "🎓",
-                            Name = "Uzman",
-                            RequiredCount = 50,
-                            Requirement = "Complete50Quizzes"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Bir quiz'de 100% başarı",
-                            Icon = "💯",
-                            Name = "Mükemmeliyetçi",
-                            RequiredCount = 1,
-                            Requirement = "PerfectScore"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "7 günlük streak",
-                            Icon = "⚡",
-                            Name = "Hızlı",
-                            RequiredCount = 7,
-                            Requirement = "Streak7Days"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Description = "30 günlük streak",
-                            Icon = "🔥",
-                            Name = "Ateş Topu",
-                            RequiredCount = 30,
-                            Requirement = "Streak30Days"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            Description = "5 arkadaş edin",
-                            Icon = "👥",
-                            Name = "Sosyal",
-                            RequiredCount = 5,
-                            Requirement = "Have5Friends"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            Description = "10 günlük challenge tamamla",
-                            Icon = "🏆",
-                            Name = "Challenge Şampiyonu",
-                            RequiredCount = 10,
-                            Requirement = "Complete10Challenges"
-                        });
-                });
 
             modelBuilder.Entity("CodeOrbit.Domain.Entities.Category", b =>
                 {
@@ -258,107 +155,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("FavoriteQuestions");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.FriendRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ReceiverId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("RespondedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("SenderId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId", "ReceiverId", "Status")
-                        .IsUnique();
-
-                    b.ToTable("FriendRequests");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Friendship", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("User1Id")
-                        .HasColumnType("int");
-
-                    b.Property<int>("User2Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("User2Id");
-
-                    b.HasIndex("User1Id", "User2Id")
-                        .IsUnique();
-
-                    b.ToTable("Friendships");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Notification", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActionUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("RelatedEntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("CodeOrbit.Domain.Entities.Option", b =>
@@ -538,33 +334,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                     b.ToTable("UserActivities");
                 });
 
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.UserBadge", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BadgeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("EarnedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BadgeId");
-
-                    b.HasIndex("UserId", "BadgeId")
-                        .IsUnique();
-
-                    b.ToTable("UserBadges");
-                });
-
             modelBuilder.Entity("CodeOrbit.Domain.Entities.UserChallengeAnswer", b =>
                 {
                     b.Property<int>("Id")
@@ -734,55 +503,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.FriendRequest", b =>
-                {
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "Receiver")
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "Sender")
-                        .WithMany()
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Friendship", b =>
-                {
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "User1")
-                        .WithMany()
-                        .HasForeignKey("User1Id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "User2")
-                        .WithMany()
-                        .HasForeignKey("User2Id")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("User1");
-
-                    b.Navigation("User2");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("CodeOrbit.Domain.Entities.Option", b =>
                 {
                     b.HasOne("CodeOrbit.Domain.Entities.Question", "Question")
@@ -861,25 +581,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.UserBadge", b =>
-                {
-                    b.HasOne("CodeOrbit.Domain.Entities.Badge", "Badge")
-                        .WithMany("UserBadges")
-                        .HasForeignKey("BadgeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CodeOrbit.Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Badge");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("CodeOrbit.Domain.Entities.UserChallengeAnswer", b =>
                 {
                     b.HasOne("CodeOrbit.Domain.Entities.Question", "Question")
@@ -954,11 +655,6 @@ namespace CodeOrbit.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("CodeOrbit.Domain.Entities.Badge", b =>
-                {
-                    b.Navigation("UserBadges");
                 });
 
             modelBuilder.Entity("CodeOrbit.Domain.Entities.Category", b =>
