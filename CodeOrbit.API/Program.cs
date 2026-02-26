@@ -20,7 +20,14 @@ builder.Services.AddScoped<IUserProgressService, UserProgressService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IQuizService, QuizService>();
-
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IActivityService, ActivityService>();
+builder.Services.AddScoped<IFavoriteService, FavoriteService>();
+builder.Services.AddScoped<IChallengeService, ChallengeService>();
+builder.Services.AddScoped<IFriendService, FriendService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IBadgeService, BadgeService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

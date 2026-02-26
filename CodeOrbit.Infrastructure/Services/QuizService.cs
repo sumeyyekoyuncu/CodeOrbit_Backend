@@ -18,19 +18,31 @@ namespace CodeOrbit.Infrastructure.Services
 
         public async Task<QuizDto> StartQuizAsync(StartQuizDto dto)
         {
-            // Rastgele sorular seç
-            var questions = await _context.Questions
+            IQueryable<Question> query = _context.Questions
                 .Where(q => q.CategoryId == dto.CategoryId && q.DifficultyLevel == dto.DifficultyLevel)
                 .Include(q => q.Options)
-                .Include(q => q.Category)
-                .OrderBy(q => Guid.NewGuid()) // Rastgele sıralama
+                .Include(q => q.Category);
+
+            // Eğer sadece favorilerden quiz istiyorsa
+            if (dto.FromFavoritesOnly)
+            {
+                var favoriteQuestionIds = await _context.FavoriteQuestions
+                    .Where(f => f.UserId == dto.UserId)
+                    .Select(f => f.QuestionId)
+                    .ToListAsync();
+
+                query = query.Where(q => favoriteQuestionIds.Contains(q.Id));
+            }
+
+            var questions = await query
+                .OrderBy(q => Guid.NewGuid())
                 .Take(dto.QuestionCount)
                 .ToListAsync();
 
             if (questions.Count < dto.QuestionCount)
                 throw new Exception($"Yeterli soru bulunamadı. İstenen: {dto.QuestionCount}, Bulunan: {questions.Count}");
 
-            // Quiz oluştur
+            // Quiz oluşturma kısmı aynı...
             var quiz = new Quiz
             {
                 UserId = dto.UserId,
@@ -43,7 +55,6 @@ namespace CodeOrbit.Infrastructure.Services
             _context.Quizzes.Add(quiz);
             await _context.SaveChangesAsync();
 
-            // QuizQuestion'ları ekle
             var quizQuestions = questions.Select(q => new QuizQuestion
             {
                 QuizId = quiz.Id,
@@ -53,7 +64,6 @@ namespace CodeOrbit.Infrastructure.Services
             _context.QuizQuestions.AddRange(quizQuestions);
             await _context.SaveChangesAsync();
 
-            // DTO'ya dönüştür (doğru cevapları gösterme)
             return new QuizDto
             {
                 QuizId = quiz.Id,
@@ -73,7 +83,6 @@ namespace CodeOrbit.Infrastructure.Services
                         {
                             Id = o.Id,
                             OptionText = o.OptionText
-                            // IsCorrect gönderme!
                         }).ToList()
                     };
                 }).ToList()
@@ -127,6 +136,14 @@ namespace CodeOrbit.Infrastructure.Services
 
             quiz.CompletedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            // Aktivite güncelle
+            var activityService = new ActivityService(_context);
+            await activityService.UpdateActivityAsync(quiz.UserId, quiz.TotalQuestions);
+
+            // ✅ Rozet kontrolü
+            var badgeService = new BadgeService(_context);
+            await badgeService.CheckAndAwardBadgesAsync(quiz.UserId);
 
             return new QuizResultDto
             {
