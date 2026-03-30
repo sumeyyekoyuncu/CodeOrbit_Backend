@@ -1,4 +1,5 @@
 ﻿using CodeOrbit.Application.DTOs.Friend;
+using CodeOrbit.Application.DTOs.Notification;
 using CodeOrbit.Application.Interfaces;
 using CodeOrbit.Domain.Entities;
 using CodeOrbit.Domain.Enums;
@@ -10,24 +11,23 @@ namespace CodeOrbit.Infrastructure.Services
     public class FriendService : IFriendService
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public FriendService(AppDbContext context)
+        public FriendService(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<bool> SendFriendRequestAsync(SendFriendRequestDto dto)
         {
-            // Kendine istek gönderemez
             if (dto.SenderId == dto.ReceiverId)
                 return false;
 
-            // Zaten arkadaş mı?
             var alreadyFriends = await AreFriendsAsync(dto.SenderId, dto.ReceiverId);
             if (alreadyFriends)
                 return false;
 
-            // Pending istek var mı?
             var existingRequest = await _context.FriendRequests
                 .FirstOrDefaultAsync(fr =>
                     ((fr.SenderId == dto.SenderId && fr.ReceiverId == dto.ReceiverId) ||
@@ -48,13 +48,11 @@ namespace CodeOrbit.Infrastructure.Services
             _context.FriendRequests.Add(request);
             await _context.SaveChangesAsync();
 
-            // ✅ Bildirim gönder
             var sender = await _context.Users.FindAsync(dto.SenderId);
-            var notificationService = new NotificationService(_context);
-            await notificationService.CreateNotificationAsync(new Application.DTOs.Notification.CreateNotificationDto
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto
             {
                 UserId = dto.ReceiverId,
-                Type = Domain.Enums.NotificationType.FriendRequest,
+                Type = NotificationType.FriendRequest,
                 Title = "Yeni arkadaşlık isteği",
                 Message = $"{sender?.Username} size arkadaşlık isteği gönderdi",
                 ActionUrl = "/friends/requests",
@@ -84,20 +82,19 @@ namespace CodeOrbit.Infrastructure.Services
                     User2Id = Math.Max(request.SenderId, request.ReceiverId),
                     CreatedAt = DateTime.UtcNow
                 };
-
                 _context.Friendships.Add(friendship);
             }
 
             await _context.SaveChangesAsync();
 
-            // Bildirim gönder
-            var notificationService = new NotificationService(_context);
-            await notificationService.CreateNotificationAsync(new Application.DTOs.Notification.CreateNotificationDto
+            await _notificationService.CreateNotificationAsync(new CreateNotificationDto
             {
                 UserId = request.SenderId,
-                Type = dto.Accept ? Domain.Enums.NotificationType.FriendRequestAccepted : Domain.Enums.NotificationType.FriendRequestRejected,
+                Type = dto.Accept ? NotificationType.FriendRequestAccepted : NotificationType.FriendRequestRejected,
                 Title = dto.Accept ? "Arkadaşlık isteği kabul edildi" : "Arkadaşlık isteği reddedildi",
-                Message = dto.Accept ? $"{request.Receiver.Username} arkadaşlık isteğinizi kabul etti" : $"{request.Receiver.Username} arkadaşlık isteğinizi reddetti",
+                Message = dto.Accept
+                    ? $"{request.Receiver.Username} arkadaşlık isteğinizi kabul etti"
+                    : $"{request.Receiver.Username} arkadaşlık isteğinizi reddetti",
                 ActionUrl = dto.Accept ? "/friends" : null
             });
 
@@ -136,7 +133,6 @@ namespace CodeOrbit.Infrastructure.Services
                 var friend = friendship.User1Id == userId ? friendship.User2 : friendship.User1;
                 var friendId = friend.Id;
 
-                // Arkadaşın istatistikleri
                 var quizCount = await _context.Quizzes
                     .CountAsync(q => q.UserId == friendId && q.CompletedAt.HasValue);
 
@@ -197,8 +193,7 @@ namespace CodeOrbit.Infrastructure.Services
             foreach (var user in users)
             {
                 var isFriend = await AreFriendsAsync(currentUserId, user.Id);
-
-                if (!isFriend) // Sadece arkadaş olmayanları göster
+                if (!isFriend)
                 {
                     result.Add(new FriendDto
                     {

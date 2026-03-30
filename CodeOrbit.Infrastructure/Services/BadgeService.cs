@@ -1,6 +1,8 @@
 ﻿using CodeOrbit.Application.DTOs.Badge;
+using CodeOrbit.Application.DTOs.Notification;
 using CodeOrbit.Application.Interfaces;
 using CodeOrbit.Domain.Entities;
+using CodeOrbit.Domain.Enums;
 using CodeOrbit.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +11,12 @@ namespace CodeOrbit.Infrastructure.Services
     public class BadgeService : IBadgeService
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public BadgeService(AppDbContext context)
+        public BadgeService(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<List<BadgeDto>> GetUserBadgesAsync(int userId)
@@ -54,33 +58,26 @@ namespace CodeOrbit.Infrastructure.Services
                 .Select(ub => ub.BadgeId)
                 .ToListAsync();
 
-            var notificationService = new NotificationService(_context);
-
             foreach (var badge in badges)
             {
-                // Zaten kazanılmışsa atla
                 if (earnedBadgeIds.Contains(badge.Id))
                     continue;
 
                 var progress = await GetProgressAsync(userId, badge.Requirement);
 
-                // Koşul sağlandı mı?
                 if (progress >= badge.RequiredCount)
                 {
-                    var userBadge = new UserBadge
+                    _context.UserBadges.Add(new UserBadge
                     {
                         UserId = userId,
                         BadgeId = badge.Id,
                         EarnedAt = DateTime.UtcNow
-                    };
+                    });
 
-                    _context.UserBadges.Add(userBadge);
-
-                    // Bildirim gönder
-                    await notificationService.CreateNotificationAsync(new Application.DTOs.Notification.CreateNotificationDto
+                    await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                     {
                         UserId = userId,
-                        Type = Domain.Enums.NotificationType.FriendAchievement,
+                        Type = NotificationType.FriendAchievement,
                         Title = $"🎉 Yeni rozet kazandın!",
                         Message = $"{badge.Icon} {badge.Name}: {badge.Description}",
                         ActionUrl = "/profile/badges"

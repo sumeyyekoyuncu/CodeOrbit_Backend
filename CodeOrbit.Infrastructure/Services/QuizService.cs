@@ -10,10 +10,14 @@ namespace CodeOrbit.Infrastructure.Services
     public class QuizService : IQuizService
     {
         private readonly AppDbContext _context;
+        private readonly IActivityService _activityService;
+        private readonly IBadgeService _badgeService;
 
-        public QuizService(AppDbContext context)
+        public QuizService(AppDbContext context, IActivityService activityService, IBadgeService badgeService)
         {
             _context = context;
+            _activityService = activityService;
+            _badgeService = badgeService;
         }
 
         public async Task<QuizDto> StartQuizAsync(StartQuizDto dto)
@@ -23,7 +27,6 @@ namespace CodeOrbit.Infrastructure.Services
                 .Include(q => q.Options)
                 .Include(q => q.Category);
 
-            // Eğer sadece favorilerden quiz istiyorsa
             if (dto.FromFavoritesOnly)
             {
                 var favoriteQuestionIds = await _context.FavoriteQuestions
@@ -42,7 +45,6 @@ namespace CodeOrbit.Infrastructure.Services
             if (questions.Count < dto.QuestionCount)
                 throw new Exception($"Yeterli soru bulunamadı. İstenen: {dto.QuestionCount}, Bulunan: {questions.Count}");
 
-            // Quiz oluşturma kısmı aynı...
             var quiz = new Quiz
             {
                 UserId = dto.UserId,
@@ -98,24 +100,19 @@ namespace CodeOrbit.Infrastructure.Services
 
             if (quizQuestion == null) return false;
 
-            // Doğru cevabı bul
             var selectedOption = quizQuestion.Question.Options
                 .FirstOrDefault(o => o.Id == dto.SelectedOptionId);
 
             if (selectedOption == null) return false;
 
-            // Cevabı kaydet
             quizQuestion.UserAnswerOptionId = dto.SelectedOptionId;
             quizQuestion.IsCorrect = selectedOption.IsCorrect;
 
-            // Quiz'in doğru cevap sayısını güncelle
             if (selectedOption.IsCorrect)
             {
                 var quiz = await _context.Quizzes.FindAsync(dto.QuizId);
                 if (quiz != null)
-                {
                     quiz.CorrectAnswers++;
-                }
             }
 
             await _context.SaveChangesAsync();
@@ -137,13 +134,8 @@ namespace CodeOrbit.Infrastructure.Services
             quiz.CompletedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            // Aktivite güncelle
-            var activityService = new ActivityService(_context);
-            await activityService.UpdateActivityAsync(quiz.UserId, quiz.TotalQuestions);
-
-            // ✅ Rozet kontrolü
-            var badgeService = new BadgeService(_context);
-            await badgeService.CheckAndAwardBadgesAsync(quiz.UserId);
+            await _activityService.UpdateActivityAsync(quiz.UserId, quiz.TotalQuestions);
+            await _badgeService.CheckAndAwardBadgesAsync(quiz.UserId);
 
             return new QuizResultDto
             {
