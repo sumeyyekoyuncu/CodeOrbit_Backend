@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CodeOrbit.API.Controllers
 {
-   
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class QuizController : ControllerBase
