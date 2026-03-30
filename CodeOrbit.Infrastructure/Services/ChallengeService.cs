@@ -1,4 +1,5 @@
 ﻿using CodeOrbit.Application.DTOs.Challenge;
+using CodeOrbit.Application.DTOs.Notification;
 using CodeOrbit.Application.DTOs.Question;
 using CodeOrbit.Application.Interfaces;
 using CodeOrbit.Domain.Entities;
@@ -11,17 +12,18 @@ namespace CodeOrbit.Infrastructure.Services
     public class ChallengeService : IChallengeService
     {
         private readonly AppDbContext _context;
+        private readonly INotificationService _notificationService;
 
-        public ChallengeService(AppDbContext context)
+        public ChallengeService(AppDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public async Task<DailyChallengeDto> GetTodaysChallengeAsync(int userId)
         {
             var today = DateTime.UtcNow.Date;
 
-            // Bugünkü challenge var mı?
             var challenge = await _context.DailyChallenges
                 .Include(c => c.Category)
                 .Include(c => c.Questions)
@@ -29,7 +31,6 @@ namespace CodeOrbit.Infrastructure.Services
                         .ThenInclude(q => q.Options)
                 .FirstOrDefaultAsync(c => c.Date == today);
 
-            // Yoksa oluştur
             if (challenge == null)
             {
                 await GenerateDailyChallengeAsync();
@@ -44,7 +45,6 @@ namespace CodeOrbit.Infrastructure.Services
             if (challenge == null)
                 throw new Exception("Challenge oluşturulamadı.");
 
-            // Kullanıcı zaten tamamlamış mı?
             var hasCompleted = await _context.UserChallengeAttempts
                 .AnyAsync(a => a.UserId == userId && a.DailyChallengeId == challenge.Id);
 
@@ -74,14 +74,12 @@ namespace CodeOrbit.Infrastructure.Services
 
         public async Task<ChallengeResultDto> SubmitChallengeAsync(SubmitChallengeDto dto)
         {
-            // Zaten tamamlamış mı kontrol et
             var existing = await _context.UserChallengeAttempts
                 .FirstOrDefaultAsync(a => a.UserId == dto.UserId && a.DailyChallengeId == dto.DailyChallengeId);
 
             if (existing != null)
                 throw new Exception("Bu challenge'ı zaten tamamladınız.");
 
-            // Cevapları kontrol et
             var correctCount = 0;
             var answers = new List<UserChallengeAnswer>();
 
@@ -89,9 +87,7 @@ namespace CodeOrbit.Infrastructure.Services
             {
                 var option = await _context.Options.FindAsync(answer.SelectedOptionId);
                 if (option != null && option.IsCorrect)
-                {
                     correctCount++;
-                }
 
                 answers.Add(new UserChallengeAnswer
                 {
@@ -101,7 +97,6 @@ namespace CodeOrbit.Infrastructure.Services
                 });
             }
 
-            // Attempt oluştur
             var attempt = new UserChallengeAttempt
             {
                 UserId = dto.UserId,
@@ -115,7 +110,6 @@ namespace CodeOrbit.Infrastructure.Services
             _context.UserChallengeAttempts.Add(attempt);
             await _context.SaveChangesAsync();
 
-            // Sıralamayı hesapla
             var allAttempts = await _context.UserChallengeAttempts
                 .Where(a => a.DailyChallengeId == dto.DailyChallengeId)
                 .OrderByDescending(a => a.CorrectAnswers)
@@ -144,35 +138,36 @@ namespace CodeOrbit.Infrastructure.Services
             if (challenge == null)
                 return new List<ChallengeLeaderboardDto>();
 
-            var leaderboard = await _context.UserChallengeAttempts
+            var attempts = await _context.UserChallengeAttempts
                 .Where(a => a.DailyChallengeId == challenge.Id)
                 .Include(a => a.User)
                 .OrderByDescending(a => a.CorrectAnswers)
                 .ThenBy(a => a.CompletedAt)
-                .Select((a, index) => new ChallengeLeaderboardDto
-                {
-                    Rank = index + 1,
-                    Username = a.User.Username,
-                    CorrectAnswers = a.CorrectAnswers,
-                    TotalQuestions = a.TotalQuestions,
-                    SuccessRate = Math.Round((double)a.CorrectAnswers / a.TotalQuestions * 100, 2),
-                    CompletedAt = a.CompletedAt
-                })
-                .Take(100) // Top 100
+                .Take(100)
                 .ToListAsync();
 
+            // Select with index SQL'e çevrilemiyor, client-side'da yapıyoruz
+            var leaderboard = attempts.Select((a, index) => new ChallengeLeaderboardDto
+            {
+                Rank = index + 1,
+                Username = a.User.Username,
+                CorrectAnswers = a.CorrectAnswers,
+                TotalQuestions = a.TotalQuestions,
+                SuccessRate = Math.Round((double)a.CorrectAnswers / a.TotalQuestions * 100, 2),
+                CompletedAt = a.CompletedAt
+            }).ToList();
+
             return leaderboard;
+
         }
 
         public async Task GenerateDailyChallengeAsync()
         {
             var today = DateTime.UtcNow.Date;
 
-            // Bugün zaten var mı?
             var exists = await _context.DailyChallenges.AnyAsync(c => c.Date == today);
             if (exists) return;
 
-            // Rastgele kategori ve zorluk seç
             var random = new Random();
             var categories = await _context.Categories.ToListAsync();
             var randomCategory = categories[random.Next(categories.Count)];
@@ -180,7 +175,6 @@ namespace CodeOrbit.Infrastructure.Services
             var difficulties = Enum.GetValues<DifficultyLevel>();
             var randomDifficulty = difficulties[random.Next(difficulties.Length)];
 
-            // 10 rastgele soru seç
             var questions = await _context.Questions
                 .Where(q => q.CategoryId == randomCategory.Id && q.DifficultyLevel == randomDifficulty)
                 .OrderBy(q => Guid.NewGuid())
@@ -189,7 +183,6 @@ namespace CodeOrbit.Infrastructure.Services
 
             if (questions.Count < 10)
             {
-                // Yeterli soru yoksa, zorluk seviyesini değiştir
                 questions = await _context.Questions
                     .Where(q => q.CategoryId == randomCategory.Id)
                     .OrderBy(q => Guid.NewGuid())
@@ -200,7 +193,6 @@ namespace CodeOrbit.Infrastructure.Services
             if (questions.Count < 10)
                 throw new Exception("Yeterli soru yok, challenge oluşturulamadı.");
 
-            // Challenge oluştur
             var challenge = new DailyChallenge
             {
                 Date = today,
@@ -216,16 +208,14 @@ namespace CodeOrbit.Infrastructure.Services
             _context.DailyChallenges.Add(challenge);
             await _context.SaveChangesAsync();
 
-            // ✅ Tüm kullanıcılara bildirim gönder
             var users = await _context.Users.ToListAsync();
-            var notificationService = new NotificationService(_context);
 
             foreach (var user in users)
             {
-                await notificationService.CreateNotificationAsync(new Application.DTOs.Notification.CreateNotificationDto
+                await _notificationService.CreateNotificationAsync(new CreateNotificationDto
                 {
                     UserId = user.Id,
-                    Type = Domain.Enums.NotificationType.DailyChallenge,
+                    Type = NotificationType.DailyChallenge,
                     Title = "🎯 Yeni günlük challenge!",
                     Message = $"Bugünün challenge'ı: {randomCategory.Name} - {randomDifficulty}",
                     ActionUrl = "/challenge"

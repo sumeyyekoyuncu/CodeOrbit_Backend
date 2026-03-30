@@ -141,8 +141,7 @@ namespace CodeOrbit.Infrastructure.Services
         {
             var category = await _context.Categories.FindAsync(categoryId);
             if (category == null)
-                return new CategoryLeaderboardDto();
-
+                return new CategoryLeaderboardDto { CategoryName = null, Entries = new() };
             // Kategoriye ait soruları çözen kullanıcılar
             var userStats = await _context.QuizQuestions
                 .Where(qq => qq.Question.CategoryId == categoryId && qq.IsCorrect.HasValue)
