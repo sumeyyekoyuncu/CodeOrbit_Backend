@@ -1,106 +1,116 @@
-# 🚀 CodeOrbit — Backend API
+# CodeOrbit Backend
 
-CodeOrbit is a backend API for a mobile coding education platform. Users can learn programming through quizzes, daily challenges, and track their progress with streaks, badges, and leaderboards.
-
----
-
-## ✨ Features
-
-- 📚 **Question & Quiz System** — Category-based questions with multiple options, quiz start/complete flow
-- 🏆 **Daily Challenges** — Daily coding questions with attempt tracking
-- 📈 **Progress Tracking** — Per-user progress, streaks, and activity history
-- 🥇 **Leaderboard** — Global and friend-based rankings
-- 👥 **Friends System** — Send/accept friend requests, view friends' progress
-- 🎖️ **Badges** — Achievement badges awarded based on user activity
-- ⭐ **Favorites** — Save and revisit favorite questions
-- 🔔 **Notifications** — In-app notification system
-- 📊 **Statistics** — Detailed user performance analytics
-- 🔐 **Authentication** — JWT-based auth
+A scalable REST API powering the CodeOrbit mobile coding education platform. Users progress through structured quizzes, daily challenges, and a social learning environment backed by streaks, badges, and leaderboards.
 
 ---
 
-## 🏗️ Architecture
+## Features
 
-The project follows **Clean Architecture**, ensuring each layer is independent and testable.
+| Domain | Capabilities |
+|---|---|
+| **Quiz & Questions** | Category-based question bank, multi-option answers, quiz session management |
+| **Daily Challenges** | Rotating daily coding problems with per-user attempt tracking |
+| **Progress & Streaks** | Per-category progress, daily usage streaks, activity history |
+| **Leaderboard** | Global rankings and friend-based competitive views |
+| **Social** | Friend requests, friendship management, friends' progress visibility |
+| **Badges** | Achievement system with activity-based badge awards |
+| **Favorites** | Save and revisit questions across sessions |
+| **Notifications** | In-app notification delivery and management |
+| **Statistics** | Detailed performance analytics per user |
+| **Authentication** | JWT-based registration, login, and token refresh |
+
+---
+
+## Architecture
+
+CodeOrbit follows **Clean Architecture** principles, ensuring each layer is independent, testable, and has a clear single responsibility.
 
 ```
 CodeOrbit/
-├── CodeOrbit.API             # Controllers, entry point
-├── CodeOrbit.Application     # Interfaces, DTOs (no external dependencies)
-├── CodeOrbit.Domain          # Entities, Enums (pure business model)
-├── CodeOrbit.Infrastructure  # Service implementations, EF Core, Migrations
-└── CodeOrbit.Tests           # Unit tests
+├── CodeOrbit.API             # HTTP controllers and application entry point
+├── CodeOrbit.Application     # Use case interfaces, DTOs, and abstractions
+├── CodeOrbit.Domain          # Core entities and enumerations (no external dependencies)
+├── CodeOrbit.Infrastructure  # EF Core, service implementations, database migrations
+└── CodeOrbit.Tests           # Unit test suite
 ```
 
-**Dependency rule:** Domain → Application → Infrastructure → API. Outer layers depend on inner layers, never the other way around.
+**Dependency rule:** `Domain → Application → Infrastructure → API`
+
+Outer layers depend on inner layers. Inner layers have no knowledge of the layers above them.
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Technology | Purpose |
 |---|---|
 | ASP.NET Core | Web API framework |
-| Entity Framework Core | ORM / Database access |
-| JWT | Authentication & authorization |
+| Entity Framework Core | ORM and database access |
+| SQL Server | Relational data store |
+| JWT | Authentication and authorization |
 | xUnit | Unit testing |
 
 ---
 
-## 📦 Domain Entities
+## Domain Model
 
 | Entity | Description |
 |---|---|
-| `User` | Platform user |
-| `Question` / `Option` | Questions with multiple choice options |
-| `Category` | Question categories (e.g. C#, Algorithms) |
-| `Quiz` / `QuizQuestion` | Quiz sessions and their questions |
-| `DailyChallenge` / `DailyChallengeQuestion` | Daily coding challenges |
-| `UserChallengeAttempt` / `UserChallengeAnswer` | User's challenge attempts and answers |
-| `UserProgress` | Per-category progress tracking |
-| `UserStreak` | Daily usage streak |
-| `UserActivity` | Activity history |
-| `Badge` / `UserBadge` | Achievement badges |
-| `FriendRequest` / `Friendship` | Social features |
-| `FavoriteQuestion` | Saved questions |
-| `Notification` | In-app notifications |
+| `User` | Platform user account |
+| `Question` / `Option` | Multiple-choice question with answer options |
+| `Category` | Question classification (e.g. C#, Algorithms) |
+| `Quiz` / `QuizQuestion` | Quiz session and its associated questions |
+| `DailyChallenge` / `DailyChallengeQuestion` | Daily coding challenge structure |
+| `UserChallengeAttempt` / `UserChallengeAnswer` | User submissions for challenges |
+| `UserProgress` | Per-category learning progress |
+| `UserStreak` | Daily engagement streak tracking |
+| `UserActivity` | Full activity history log |
+| `Badge` / `UserBadge` | Achievement definitions and user awards |
+| `FriendRequest` / `Friendship` | Social connection model |
+| `FavoriteQuestion` | User-saved questions |
+| `Notification` | In-app notification records |
 
 ---
 
-## 📡 API Endpoints
+## API Reference
 
-| Controller | Description |
+| Controller | Endpoints |
 |---|---|
 | `/api/auth` | Register, login, token refresh |
 | `/api/question` | List, filter, and manage questions |
 | `/api/category` | Question categories |
-| `/api/quiz` | Start and complete quizzes |
+| `/api/quiz` | Start and complete quiz sessions |
 | `/api/challenge` | Daily challenge flow |
-| `/api/userprogress` | Track learning progress |
-| `/api/leaderboard` | Global and friend rankings |
-| `/api/friend` | Friend requests and friendships |
-| `/api/badge` | User badges and achievements |
-| `/api/favorite` | Save/remove favorite questions |
-| `/api/notification` | User notifications |
-| `/api/statistics` | User performance stats |
+| `/api/userprogress` | Learning progress tracking |
+| `/api/leaderboard` | Global and friend-based rankings |
+| `/api/friend` | Friend requests and friendship management |
+| `/api/badge` | User badges and achievement history |
+| `/api/favorite` | Save and remove favorite questions |
+| `/api/notification` | User notification management |
+| `/api/statistics` | User performance analytics |
 | `/api/activity` | Activity history |
 
 ---
 
-## ⚙️ Getting Started
+## Getting Started
 
 ### Prerequisites
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- SQL Server 
 
-### Run Locally
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- SQL Server instance (local or remote)
+
+### Local Setup
+
+**1. Clone the repository**
 
 ```bash
 git clone https://github.com/sumeyyekoyuncu/CodeOrbit_Backend.git
 cd CodeOrbit_Backend
 ```
 
-Update `appsettings.json` with your configuration:
+**2. Configure the application**
+
+Update `appsettings.json` with your environment values:
 
 ```json
 {
@@ -114,6 +124,8 @@ Update `appsettings.json` with your configuration:
 }
 ```
 
+**3. Restore, migrate, and run**
+
 ```bash
 dotnet restore
 dotnet ef database update --project CodeOrbit.Infrastructure --startup-project CodeOrbit.API
@@ -122,10 +134,12 @@ dotnet run --project CodeOrbit.API
 
 ---
 
-## 🧪 Tests
+## Running Tests
 
 ```bash
 dotnet test
 ```
 
+Test coverage targets core application logic and domain rules. All tests are isolated from infrastructure dependencies.
 
+---
