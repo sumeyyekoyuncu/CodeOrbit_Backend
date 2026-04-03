@@ -97,7 +97,7 @@ Outer layers depend on inner layers. Inner layers have no knowledge of the layer
 ### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- SQL Server instance (local or remote)
+- PostgreSql
 
 ### Local Setup
 
