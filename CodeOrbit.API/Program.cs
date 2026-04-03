@@ -18,7 +18,7 @@ if (builder.Environment.IsEnvironment("Testing"))
 else
 {
     builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }// Servisler
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();

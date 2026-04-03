@@ -1,5 +1,4 @@
-﻿using Azure;
-using CodeOrbit.Application.DTOs.Quiz;
+﻿using CodeOrbit.Application.DTOs.Quiz;
 using CodeOrbit.Domain.Enums;
 using CodeOrbit.Infrastructure.Data;
 using Microsoft.Extensions.Configuration;
