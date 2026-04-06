@@ -48,7 +48,7 @@ Outer layers depend on inner layers. Inner layers have no knowledge of the layer
 |---|---|
 | ASP.NET Core | Web API framework |
 | Entity Framework Core | ORM and database access |
-| SQL Server | Relational data store |
+| Postgresql | Relational data store |
 | JWT | Authentication and authorization |
 | xUnit | Unit testing |
 
