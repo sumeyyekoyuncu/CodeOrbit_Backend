@@ -1,7 +1,10 @@
-﻿using CodeOrbit.Infrastructure.Data;
+﻿using CodeOrbit.Application.DTOs.Leaderboard;
+using CodeOrbit.Application.Interfaces;
+using CodeOrbit.Infrastructure.Data;
 using CodeOrbit.Infrastructure.Services;
 using CodeOrbit.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 using Xunit;
 
 namespace CodeOrbit.Tests.Services
@@ -20,9 +23,17 @@ namespace CodeOrbit.Tests.Services
                 .Options;
 
             _context = new AppDbContext(options);
-            _sut = new LeaderboardService(_context);
-        }
 
+            var mockCache = new Mock<ILeaderboardCacheService>();
+            mockCache.Setup(x => x.GetGlobalLeaderboardAsync()).ReturnsAsync((List<LeaderboardEntryDto>?)null);
+            mockCache.Setup(x => x.GetWeeklyLeaderboardAsync()).ReturnsAsync((List<LeaderboardEntryDto>?)null);
+            mockCache.Setup(x => x.GetStreakLeaderboardAsync()).ReturnsAsync((List<LeaderboardEntryDto>?)null);
+            mockCache.Setup(x => x.SetGlobalLeaderboardAsync(It.IsAny<List<LeaderboardEntryDto>>())).Returns(Task.CompletedTask);
+            mockCache.Setup(x => x.SetWeeklyLeaderboardAsync(It.IsAny<List<LeaderboardEntryDto>>())).Returns(Task.CompletedTask);
+            mockCache.Setup(x => x.SetStreakLeaderboardAsync(It.IsAny<List<LeaderboardEntryDto>>())).Returns(Task.CompletedTask);
+
+            _sut = new LeaderboardService(_context, mockCache.Object);
+        }
         public void Dispose() => _context.Dispose();
 
         #endregion

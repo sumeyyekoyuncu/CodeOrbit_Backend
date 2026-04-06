@@ -8,14 +8,25 @@ namespace CodeOrbit.Infrastructure.Services
     public class LeaderboardService : ILeaderboardService
     {
         private readonly AppDbContext _context;
+        private readonly ILeaderboardCacheService _cache;
 
-        public LeaderboardService(AppDbContext context)
+        public LeaderboardService(AppDbContext context, ILeaderboardCacheService cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         public async Task<List<LeaderboardEntryDto>> GetGlobalLeaderboardAsync(int currentUserId, int top = 100)
         {
+            // 1. Cache'e bak
+            var cached = await _cache.GetGlobalLeaderboardAsync();
+            if (cached != null)
+            {
+                MarkCurrentUser(cached, currentUserId);
+                return cached;
+            }
+
+            // 2. Cache'de yoksa DB'den çek
             var users = await _context.Users
                 .Select(u => new
                 {
@@ -38,24 +49,32 @@ namespace CodeOrbit.Infrastructure.Services
                     SuccessRate = x.TotalQuestions > 0 ? Math.Round((double)x.CorrectAnswers / x.TotalQuestions * 100, 2) : 0,
                     BadgeCount = x.BadgeCount,
                     CurrentStreak = x.CurrentStreak,
-                    IsCurrentUser = x.User.Id == currentUserId
+                    IsCurrentUser = false
                 })
                 .OrderByDescending(x => x.Score)
                 .ThenByDescending(x => x.SuccessRate)
                 .Take(top)
                 .ToList();
 
-            // Rank ekle
             for (int i = 0; i < leaderboard.Count; i++)
-            {
                 leaderboard[i].Rank = i + 1;
-            }
 
+            // 3. Cache'e yaz
+            await _cache.SetGlobalLeaderboardAsync(leaderboard);
+
+            MarkCurrentUser(leaderboard, currentUserId);
             return leaderboard;
         }
 
         public async Task<List<LeaderboardEntryDto>> GetWeeklyLeaderboardAsync(int currentUserId, int top = 100)
         {
+            var cached = await _cache.GetWeeklyLeaderboardAsync();
+            if (cached != null)
+            {
+                MarkCurrentUser(cached, currentUserId);
+                return cached;
+            }
+
             var oneWeekAgo = DateTime.UtcNow.AddDays(-7);
 
             var users = await _context.Users
@@ -80,7 +99,7 @@ namespace CodeOrbit.Infrastructure.Services
                     SuccessRate = x.TotalQuestions > 0 ? Math.Round((double)x.CorrectAnswers / x.TotalQuestions * 100, 2) : 0,
                     BadgeCount = x.BadgeCount,
                     CurrentStreak = x.CurrentStreak,
-                    IsCurrentUser = x.User.Id == currentUserId
+                    IsCurrentUser = false
                 })
                 .OrderByDescending(x => x.Score)
                 .ThenByDescending(x => x.SuccessRate)
@@ -88,15 +107,23 @@ namespace CodeOrbit.Infrastructure.Services
                 .ToList();
 
             for (int i = 0; i < leaderboard.Count; i++)
-            {
                 leaderboard[i].Rank = i + 1;
-            }
 
+            await _cache.SetWeeklyLeaderboardAsync(leaderboard);
+
+            MarkCurrentUser(leaderboard, currentUserId);
             return leaderboard;
         }
 
         public async Task<List<LeaderboardEntryDto>> GetStreakLeaderboardAsync(int currentUserId, int top = 100)
         {
+            var cached = await _cache.GetStreakLeaderboardAsync();
+            if (cached != null)
+            {
+                MarkCurrentUser(cached, currentUserId);
+                return cached;
+            }
+
             var users = await _context.UserStreaks
                 .Include(s => s.User)
                 .Where(s => s.CurrentStreak > 0)
@@ -130,10 +157,13 @@ namespace CodeOrbit.Infrastructure.Services
                     SuccessRate = successRate,
                     BadgeCount = badgeCount,
                     CurrentStreak = user.CurrentStreak,
-                    IsCurrentUser = user.UserId == currentUserId
+                    IsCurrentUser = false
                 });
             }
 
+            await _cache.SetStreakLeaderboardAsync(leaderboard);
+
+            MarkCurrentUser(leaderboard, currentUserId);
             return leaderboard;
         }
 
@@ -142,7 +172,7 @@ namespace CodeOrbit.Infrastructure.Services
             var category = await _context.Categories.FindAsync(categoryId);
             if (category == null)
                 return new CategoryLeaderboardDto { CategoryName = null, Entries = new() };
-            // Kategoriye ait soruları çözen kullanıcılar
+
             var userStats = await _context.QuizQuestions
                 .Where(qq => qq.Question.CategoryId == categoryId && qq.IsCorrect.HasValue)
                 .GroupBy(qq => qq.Quiz.UserId)
@@ -182,9 +212,7 @@ namespace CodeOrbit.Infrastructure.Services
                 .ToList();
 
             for (int i = 0; i < entries.Count; i++)
-            {
                 entries[i].Rank = i + 1;
-            }
 
             return new CategoryLeaderboardDto
             {
@@ -205,6 +233,14 @@ namespace CodeOrbit.Infrastructure.Services
             }
 
             return result;
+        }
+
+        // IsCurrentUser her kullanıcı için farklı olduğundan cache'e kaydedilmiyor,
+        // cache'den okuduktan sonra dinamik olarak işaretleniyor
+        private void MarkCurrentUser(List<LeaderboardEntryDto> leaderboard, int currentUserId)
+        {
+            foreach (var entry in leaderboard)
+                entry.IsCurrentUser = entry.UserId == currentUserId;
         }
     }
 }
