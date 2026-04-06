@@ -1,5 +1,7 @@
 # CodeOrbit Backend
 
+![CI](https://github.com/sumeyyekoyuncu/CodeOrbit_Backend/actions/workflows/ci.yml/badge.svg)
+
 A scalable REST API powering the CodeOrbit mobile coding education platform. Users progress through structured quizzes, daily challenges, and a social learning environment backed by streaks, badges, and leaderboards.
 
 ---
