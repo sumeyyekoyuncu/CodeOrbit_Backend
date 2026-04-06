@@ -13,7 +13,7 @@ A scalable REST API powering the CodeOrbit mobile coding education platform. Use
 | **Quiz & Questions** | Category-based question bank, multi-option answers, quiz session management |
 | **Daily Challenges** | Rotating daily coding problems with per-user attempt tracking |
 | **Progress & Streaks** | Per-category progress, daily usage streaks, activity history |
-| **Leaderboard** | Global rankings and friend-based competitive views |
+| **Leaderboard** | Global, weekly, streak, and category-based rankings with Redis caching |
 | **Social** | Friend requests, friendship management, friends' progress visibility |
 | **Badges** | Achievement system with activity-based badge awards |
 | **Favorites** | Save and revisit questions across sessions |
@@ -33,7 +33,7 @@ CodeOrbit/
 ├── CodeOrbit.Application     # Use case interfaces, DTOs, and abstractions
 ├── CodeOrbit.Domain          # Core entities and enumerations (no external dependencies)
 ├── CodeOrbit.Infrastructure  # EF Core, service implementations, database migrations
-└── CodeOrbit.Tests           # Unit test suite
+└── CodeOrbit.Tests           # Unit and integration test suite
 ```
 
 **Dependency rule:** `Domain → Application → Infrastructure → API`
@@ -48,9 +48,11 @@ Outer layers depend on inner layers. Inner layers have no knowledge of the layer
 |---|---|
 | ASP.NET Core | Web API framework |
 | Entity Framework Core | ORM and database access |
-| Postgresql | Relational data store |
+| PostgreSQL | Relational data store |
+| Redis | Leaderboard response caching |
 | JWT | Authentication and authorization |
-| xUnit | Unit testing |
+| xUnit | Unit and integration testing |
+| GitHub Actions | CI pipeline — build and test on every push |
 
 ---
 
@@ -84,7 +86,7 @@ Outer layers depend on inner layers. Inner layers have no knowledge of the layer
 | `/api/quiz` | Start and complete quiz sessions |
 | `/api/challenge` | Daily challenge flow |
 | `/api/userprogress` | Learning progress tracking |
-| `/api/leaderboard` | Global and friend-based rankings |
+| `/api/leaderboard` | Global, weekly, streak, and category rankings |
 | `/api/friend` | Friend requests and friendship management |
 | `/api/badge` | User badges and achievement history |
 | `/api/favorite` | Save and remove favorite questions |
@@ -98,8 +100,9 @@ Outer layers depend on inner layers. Inner layers have no knowledge of the layer
 
 ### Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/download)
-- PostgreSql
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- PostgreSQL
+- Redis
 
 ### Local Setup
 
@@ -117,11 +120,14 @@ Update `appsettings.json` with your environment values:
 ```json
 {
   "ConnectionStrings": {
-    "Default": "your_connection_string"
+    "DefaultConnection": "Host=localhost;Port=5432;Database=codeorbit;Username=postgres;Password=yourpassword",
+    "Redis": "localhost:6379"
   },
-  "JwtSettings": {
-    "SecretKey": "your_secret_key",
-    "ExpiryMinutes": 60
+  "Jwt": {
+    "Key": "your_secret_key",
+    "Issuer": "CodeOrbitAPI",
+    "Audience": "CodeOrbitClient",
+    "ExpireDays": 7
   }
 }
 ```
@@ -142,6 +148,11 @@ dotnet run --project CodeOrbit.API
 dotnet test
 ```
 
-Test coverage targets core application logic and domain rules. All tests are isolated from infrastructure dependencies.
+Unit tests cover core application logic and domain rules. Integration tests verify end-to-end API behavior using an in-memory database, allowing the full test suite to run without any external dependencies.
 
 ---
+
+## Deployment
+
+The API is deployed on Railway with a managed PostgreSQL instance and Redis service. Environment variables are configured via the Railway dashboard.
+Live API: https://codeorbitbackend-production.up.railway.app/swagger/index.html
