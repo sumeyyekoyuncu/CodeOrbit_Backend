@@ -42,13 +42,7 @@ namespace CodeOrbit.Tests.Integration
             return Task.CompletedTask;
         }
 
-        // Her test için challenge'ı hazırlar ve döndürür
-        private async Task<DailyChallengeDto> SetupChallengeAsync()
-        {
-            await IntegrationTestHelpers.SeedCategoryWithQuestionsAsync(_scope, QuestionCount: 10);
-            var response = await _client.GetAsync($"/api/Challenge/today/{_userId}");
-            return (await response.Content.ReadFromJsonAsync<DailyChallengeDto>())!;
-        }
+  
 
         // Challenge için tüm doğru cevapları oluşturur
         private SubmitChallengeDto BuildSubmitDto(DailyChallengeDto challenge, bool allCorrect = true)
