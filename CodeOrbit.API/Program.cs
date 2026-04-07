@@ -22,17 +22,8 @@ else
 }
 
 // Redis
-if (!builder.Environment.IsEnvironment("Testing"))
-{
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.Configuration = builder.Configuration.GetConnectionString("Redis");
-    });
-}
-else
-{
-    builder.Services.AddDistributedMemoryCache();
-}
+// Cache
+builder.Services.AddDistributedMemoryCache();
 
 // Servisler
 builder.Services.AddScoped<IAuthService, AuthService>();
