@@ -60,8 +60,7 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000",
                 "https://codeorbit-web.vercel.app")
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
