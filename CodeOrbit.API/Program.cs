@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using CodeOrbit.Application.Interfaces;
 using CodeOrbit.Infrastructure.Data;
 using CodeOrbit.Infrastructure.Services;
@@ -20,6 +20,7 @@ else
     builder.Services.AddDbContext<AppDbContext>(options =>
      options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 }
+
 // Redis
 if (!builder.Environment.IsEnvironment("Testing"))
 {
@@ -32,6 +33,7 @@ else
 {
     builder.Services.AddDistributedMemoryCache();
 }
+
 // Servisler
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IQuestionService, QuestionService>();
@@ -48,6 +50,20 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<ILeaderboardCacheService, RedisLeaderboardCacheService>();
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",
+                "https://codeorbit-web.vercel.app")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 // JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -65,8 +81,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-
-
 builder.Services.AddControllers();
 builder.Services.Configure<RouteOptions>(options =>
 {
@@ -75,7 +89,7 @@ builder.Services.Configure<RouteOptions>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Swagger'a JWT desteği 
+// Swagger'a JWT desteği
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -103,19 +117,16 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 var app = builder.Build();
 
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
-
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
 
 public partial class Program { }
