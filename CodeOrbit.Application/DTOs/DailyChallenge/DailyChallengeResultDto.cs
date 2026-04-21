@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using CodeOrbit.Application.DTOs.DailyChallenge;
 
 namespace CodeOrbit.Application.DTOs.Challenge
 {
-    public class ChallengeResultDto
+    public class DailyChallengeResultDto
     {
         public int CorrectAnswers { get; set; }
         public int TotalQuestions { get; set; }
         public double SuccessRate { get; set; }
-        public int Rank { get; set; } // Bugünkü challenge'da kaçıncı olduğu
+        public int Rank { get; set; }
         public int TotalParticipants { get; set; }
+        public List<DailyChallengeAnswerResultDto> AnswerResults { get; set; } = new();
     }
 }

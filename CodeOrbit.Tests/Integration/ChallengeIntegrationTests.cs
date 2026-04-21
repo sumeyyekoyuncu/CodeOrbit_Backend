@@ -107,7 +107,7 @@ namespace CodeOrbit.Tests.Integration
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadFromJsonAsync<ChallengeResultDto>();
+            var result = await response.Content.ReadFromJsonAsync<DailyChallengeResultDto>();
             Assert.NotNull(result);
             Assert.Equal(10, result!.TotalQuestions);
             Assert.Equal(10, result.CorrectAnswers);
