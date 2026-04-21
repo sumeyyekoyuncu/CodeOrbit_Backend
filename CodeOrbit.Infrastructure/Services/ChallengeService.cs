@@ -1,4 +1,5 @@
 ﻿using CodeOrbit.Application.DTOs.Challenge;
+using CodeOrbit.Application.DTOs.DailyChallenge;
 using CodeOrbit.Application.DTOs.Notification;
 using CodeOrbit.Application.DTOs.Question;
 using CodeOrbit.Application.Interfaces;
@@ -72,7 +73,7 @@ namespace CodeOrbit.Infrastructure.Services
             };
         }
 
-        public async Task<ChallengeResultDto> SubmitChallengeAsync(SubmitChallengeDto dto)
+        public async Task<DailyChallengeResultDto> SubmitChallengeAsync(SubmitChallengeDto dto)
         {
             var existing = await _context.UserChallengeAttempts
                 .FirstOrDefaultAsync(a => a.UserId == dto.UserId && a.DailyChallengeId == dto.DailyChallengeId);
@@ -118,13 +119,19 @@ namespace CodeOrbit.Infrastructure.Services
 
             var rank = allAttempts.FindIndex(a => a.Id == attempt.Id) + 1;
 
-            return new ChallengeResultDto
+            return new DailyChallengeResultDto
             {
                 CorrectAnswers = correctCount,
                 TotalQuestions = dto.Answers.Count,
                 SuccessRate = Math.Round((double)correctCount / dto.Answers.Count * 100, 2),
                 Rank = rank,
-                TotalParticipants = allAttempts.Count
+                TotalParticipants = allAttempts.Count,
+                AnswerResults = answers.Select(a => new DailyChallengeAnswerResultDto
+                {
+                    QuestionId = a.QuestionId,
+                    IsCorrect = a.IsCorrect,
+                    CorrectOptionId = 0
+                }).ToList()
             };
         }
 
@@ -146,7 +153,6 @@ namespace CodeOrbit.Infrastructure.Services
                 .Take(100)
                 .ToListAsync();
 
-            // Select with index SQL'e çevrilemiyor, client-side'da yapıyoruz
             var leaderboard = attempts.Select((a, index) => new ChallengeLeaderboardDto
             {
                 Rank = index + 1,
@@ -158,7 +164,6 @@ namespace CodeOrbit.Infrastructure.Services
             }).ToList();
 
             return leaderboard;
-
         }
 
         public async Task GenerateDailyChallengeAsync()

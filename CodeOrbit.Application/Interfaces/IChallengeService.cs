@@ -10,8 +10,7 @@ namespace CodeOrbit.Application.Interfaces
     public interface IChallengeService
     {
         Task<DailyChallengeDto> GetTodaysChallengeAsync(int userId);
-        Task<ChallengeResultDto> SubmitChallengeAsync(SubmitChallengeDto dto);
-        Task<List<ChallengeLeaderboardDto>> GetTodaysLeaderboardAsync();
+        Task<DailyChallengeResultDto> SubmitChallengeAsync(SubmitChallengeDto dto); Task<List<ChallengeLeaderboardDto>> GetTodaysLeaderboardAsync();
         Task GenerateDailyChallengeAsync(); // Admin/Background job için
     }
 }
