@@ -48,5 +48,12 @@ namespace CodeOrbit.API.Controllers
             if (!result) return NotFound();
             return Ok();
         }
+        [HttpPut("avatar")]
+        public async Task<IActionResult> UpdateAvatar([FromBody] UpdateAvatarDto dto)
+        {
+            var result = await _userService.UpdateAvatarAsync(dto);
+            if (!result) return NotFound();
+            return Ok();
+        }
     }
 }

@@ -13,5 +13,6 @@ namespace CodeOrbit.Application.Interfaces
         Task<bool> UpdateUsernameAsync(UpdateUsernameDto dto);
         Task<bool> UpdatePasswordAsync(UpdatePasswordDto dto);
         Task<bool> UpdateProfilePhotoAsync(UpdateProfilePhotoDto dto);
+        Task<bool> UpdateAvatarAsync(UpdateAvatarDto dto);
     }
 }

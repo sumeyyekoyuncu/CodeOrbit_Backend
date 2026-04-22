@@ -16,5 +16,6 @@ namespace CodeOrbit.Domain.Entities
 
         public ICollection<UserProgress> UserProgresses { get; set; } = new List<UserProgress>();
         public string? ProfilePhoto { get; set; }
+        public string? Avatar { get; set; }
     }
 }
