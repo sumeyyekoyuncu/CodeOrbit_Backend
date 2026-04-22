@@ -86,13 +86,20 @@ namespace CodeOrbit.Infrastructure.Services
                 })
                 .ToList();
 
+
+            var streak = await _context.UserStreaks
+    .FirstOrDefaultAsync(s => s.UserId == userId);
+
             return new UserStatisticsDto
             {
+
                 TotalQuizzes = completedQuizzes.Count,
                 TotalQuestionsSolved = totalQuestions,
                 TotalCorrectAnswers = totalCorrect,
                 TotalWrongAnswers = totalWrong,
                 OverallSuccessRate = totalQuestions > 0 ? Math.Round((double)totalCorrect / totalQuestions * 100, 2) : 0,
+                CurrentStreak = streak?.CurrentStreak ?? 0,
+                LongestStreak = streak?.LongestStreak ?? 0,
                 CategoryStats = categoryStats,
                 DifficultyStats = difficultyStats,
                 MostWrongQuestions = mostWrongQuestions

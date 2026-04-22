@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using CodeOrbit.Application.Interfaces;
 using CodeOrbit.Infrastructure.Data;
 using CodeOrbit.Infrastructure.Services;
