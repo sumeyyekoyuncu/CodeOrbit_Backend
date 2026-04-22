@@ -30,6 +30,7 @@ namespace CodeOrbit.Infrastructure.Services
                 Username = user.Username,
                 Email = user.Email,
                 ProfilePhoto = user.ProfilePhoto,
+                Avatar = user.Avatar,
                 CreatedAt = user.CreatedAt
             };
         }
@@ -69,6 +70,14 @@ namespace CodeOrbit.Infrastructure.Services
             if (user == null) return false;
 
             user.ProfilePhoto = dto.PhotoBase64;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> UpdateAvatarAsync(UpdateAvatarDto dto)
+        {
+            var user = await _context.Users.FindAsync(dto.UserId);
+            if (user == null) return false;
+            user.Avatar = dto.Avatar;
             await _context.SaveChangesAsync();
             return true;
         }

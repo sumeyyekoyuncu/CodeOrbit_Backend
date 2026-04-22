@@ -12,6 +12,7 @@ namespace CodeOrbit.Application.DTOs.User
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? ProfilePhoto { get; set; }
+        public string? Avatar { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
