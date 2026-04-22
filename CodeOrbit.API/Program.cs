@@ -41,6 +41,7 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<ILeaderboardCacheService, RedisLeaderboardCacheService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // CORS
 builder.Services.AddCors(options =>
