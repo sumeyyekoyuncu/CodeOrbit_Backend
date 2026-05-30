@@ -6,16 +6,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CodeOrbit.API.Controllers
 {
-    
     [ApiController]
     [Route("api/[controller]")]
     public class QuestionController : ControllerBase
     {
         private readonly IQuestionService _questionService;
+        private readonly IAiQuestionService _aiQuestionService;
 
-        public QuestionController(IQuestionService questionService)
+        public QuestionController(IQuestionService questionService, IAiQuestionService aiQuestionService)
         {
             _questionService = questionService;
+            _aiQuestionService = aiQuestionService;
         }
 
         [HttpGet]
@@ -63,6 +64,24 @@ namespace CodeOrbit.API.Controllers
             var result = await _questionService.DeleteAsync(id);
             if (!result) return NotFound();
             return NoContent();
+        }
+
+        [HttpPost("generate")]
+        public async Task<IActionResult> GenerateWithAi([FromBody] GenerateQuestionRequestDto request)
+        {
+            try
+            {
+                var result = await _aiQuestionService.GenerateQuestionsAsync(request);
+                return Ok(new
+                {
+                    message = $"{result.Count} soru başarıyla üretildi ve kaydedildi.",
+                    questions = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

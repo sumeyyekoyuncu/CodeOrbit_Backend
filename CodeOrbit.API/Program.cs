@@ -42,6 +42,7 @@ builder.Services.AddScoped<IBadgeService, BadgeService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<ILeaderboardCacheService, RedisLeaderboardCacheService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAiQuestionService, AiQuestionService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -113,7 +114,6 @@ var app = builder.Build();
 
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
